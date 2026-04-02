@@ -3,7 +3,7 @@ name = "task-classifier-rd"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.14"
+requires-python = ">=3.11"
 dependencies = [
     "anthropic>=0.75.0",
     "dotenv>=0.9.9",
@@ -17,6 +17,7 @@ dependencies = [
     "sqlalchemy>=2.0.45",
     "streamlit>=1.52.1",
     "todoist-api-python>=3.1.0",
+    "voyageai>=0.3.7",
 ]
 
 [dependency-groups]

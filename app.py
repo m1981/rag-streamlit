@@ -1,72 +1,52 @@
 import streamlit as st
-import streamlit as st
+from dotenv import load_dotenv
+from core.rag_engine import CADVideoRAG
 from core import database as db
-from core.database import TranscriptModel
+
+load_dotenv()
+db.init_db()  # Ensure DB exists
+
+st.set_page_config(page_title="CAD Search", page_icon="🔍")
 
 
-# 1. Initialize DB on startup
-db.init_db()
+# --- CACHE THE DOMAIN ENGINE ---
+@st.cache_resource
+def load_engine():
+    try:
+        return CADVideoRAG()
+    except FileNotFoundError:
+        return None
 
-st.title("🛠️ Phase 1: Data Preparation")
 
-# --- TAB 1: Add New Transcript ---
-tab1, tab2, tab3 = st.tabs(["Add Transcript", "Edit Prompt", "Run Indexer"])
+rag_engine = load_engine()
 
-with tab1:
-    st.subheader("Add New Video")
-    with st.form("add_form"):
-        title = st.text_input("Tutorial Subject")
-        url = st.text_input("YouTube URL")
-        raw_text = st.text_area("Raw Transcript Text", height=200)
+st.title("🛠️ CAD Video Assistant")
 
-        if st.form_submit_button("Save to Database"):
-            if title and url and raw_text:
-                # Create the Data Model
-                new_data = TranscriptModel(title=title, url=url, raw_text=raw_text)
+if not rag_engine:
+    st.warning(
+        "⚠️ No vector index found. Please go to 'Data Preparation' in the sidebar and run the indexer."
+    )
+    st.stop()
 
-                # Save it
-                success = db.save_transcript(new_data)
+# --- STATE MANAGEMENT ---
+if "messages" not in st.session_state:
+    st.session_state.messages = [
+        {"role": "assistant", "content": "Cześć! W czym mogę pomóc w programie CAD?"}
+    ]
 
-                if success:
-                    st.success("Saved successfully!")
-                else:
-                    st.error("This URL already exists in the database.")
-            else:
-                st.warning("Please fill out all fields.")
+for msg in st.session_state.messages:
+    with st.chat_message(msg["role"]):
+        st.markdown(msg["content"])
 
-# --- TAB 2: Edit LLM Prompt ---
-with tab2:
-    st.subheader("LLM Enrichment Prompt")
-    current_prompt = db.get_active_prompt()
+# --- EVENT HANDLING ---
+if user_query := st.chat_input("np. Jak obrócić kamerę?"):
+    st.session_state.messages.append({"role": "user", "content": user_query})
+    with st.chat_message("user"):
+        st.markdown(user_query)
 
-    new_prompt = st.text_area("Instructions for Claude", value=current_prompt, height=150)
+    with st.chat_message("assistant"):
+        with st.spinner("Szukam w materiałach wideo..."):
+            answer = rag_engine.search(user_query)
+            st.markdown(answer)
 
-    if st.button("Update Prompt"):
-        db.save_new_prompt(new_prompt)
-        st.warning(
-            "Prompt updated. All previously processed videos are now marked as 'outdated' and will be re-indexed.")
-
-# --- TAB 3: Run Pipeline ---
-with tab3:
-    st.subheader("ETL Pipeline")
-    pending = db.get_pending_transcripts()
-
-    st.write(f"**{len(pending)}** videos waiting to be processed.")
-
-    if st.button("Run Indexing Pipeline") and pending:
-        progress_bar = st.progress(0)
-
-        for i, transcript in enumerate(pending):
-            st.write(f"Processing: {transcript.title}...")
-
-            # 1. Chunking logic here...
-            # 2. LLM logic here...
-            # 3. LlamaIndex logic here...
-
-            # 4. Mark as done in DB
-            db.update_transcript_status(transcript.id, 'processed')
-
-            # Update UI
-            progress_bar.progress((i + 1) / len(pending))
-
-        st.success("Indexing complete!")
+    st.session_state.messages.append({"role": "assistant", "content": answer})
