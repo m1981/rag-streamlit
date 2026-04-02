@@ -48,7 +48,7 @@ filterwarnings = [
 ]
 
 [tool.coverage.run]
-source = ["school_hub"]
+source = ["core"]
 branch = true
 omit = [
     "*/__init__.py",
@@ -79,16 +79,14 @@ exclude_lines = [
 
 
 [tool.mutmut]
-paths_to_mutate = ["services/"]
+paths_to_mutate = ["core/"]
 tests_dir = ["tests/"]
 
 # File Management - include all necessary files
 also_copy = [
     "conftest.py",
     ".env",
-    "models/",
-    "services",
-    "interfaces.py"
+    "core",
 ]
 
 # Exclusions

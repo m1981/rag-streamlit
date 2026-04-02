@@ -47,7 +47,7 @@ test: ## Run tests with coverage
 test-cov-simple: ## Run UNIT tests with simple console coverage report (shows missing lines)
 	@echo "$(GREEN)Running Unit Tests with Simple Coverage Report...$(RESET)"
 	uv run pytest  \
-		--cov=school_hub \
+		--cov=core \
 		--cov-report=term-missing \
 		--cov-fail-under=0
 
