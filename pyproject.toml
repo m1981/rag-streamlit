@@ -1,0 +1,72 @@
+[project]
+name = "task-classifier-rd"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "anthropic>=0.75.0",
+    "dotenv>=0.9.9",
+    "hypothesis>=6.148.7",
+    "pyyaml>=6.0.3",
+    "sqlalchemy>=2.0.45",
+    "streamlit>=1.52.1",
+    "todoist-api-python>=3.1.0",
+]
+
+[dependency-groups]
+dev = [
+    "mutmut>=3.4.0",
+    "pytest>=9.0.2",
+    "pytest-cov>=7.0.0",
+    "pytest-watch>=4.2.0",
+]
+
+[tool.pytest.ini_options]
+filterwarnings = [
+    "ignore::ResourceWarning"
+]
+minversion = "6.0"
+# CHANGED: Removed --cov flags from here.
+# Mutmut runs pytest repeatedly; running coverage every time is slow and breaks the trampoline.
+addopts = [
+    "-ra",
+    "-q"
+]
+pythonpath = "."
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+
+
+[tool.mutmut]
+paths_to_mutate = ["services/"]
+tests_dir = ["tests/"]
+
+# File Management - include all necessary files
+also_copy = [
+    "conftest.py",
+    ".env",
+    "models/",
+    "services",
+    "interfaces.py"
+]
+
+# Exclusions
+do_not_mutate = [
+    "**/migrations/*",
+    "**/__pycache__/*",
+    "tests/*"
+]
+
+
+# Performance
+max_stack_depth = 8
+
+pytest_flags = ["-x", "-q"]
+mutate_only_covered_lines = true
+
+# Debugging (set to false once working)
+debug = true
+backup = false
