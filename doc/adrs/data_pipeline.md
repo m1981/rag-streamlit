@@ -6,7 +6,7 @@
 *   *Positive:* Guarantees that the LLM summary perfectly aligns with the video timeline, allowing the Phase 2 UI to generate accurate `?t=XX` YouTube links.
 *   *Negative:* Requires custom Regex parsing logic that must be updated if the source transcript format changes (e.g., moving from `.srt` to `.vtt`).
 
-### ADR 009: LLM-Driven Data Enrichment in ETL
+## ADR 009: LLM-Driven Data Enrichment in ETL
 **Status:** Accepted
 **Context:** Raw auto-generated YouTube transcripts (especially for visual CAD tutorials) lack semantic context. A transcript might say "Now click here and drag," which is useless for a vector search engine looking for "How to extrude a cylinder."
 **Decision:** Instead of embedding the raw transcript text directly, we use an LLM (Claude 3.5 Haiku) *during the ETL phase* to act as a data transformer. The LLM reads the messy, unpunctuated Polish transcript and generates a clean, keyword-rich summary of the visual actions taking place. We embed this summary alongside the raw text.
@@ -14,7 +14,7 @@
 *   *Positive:* Drastically improves semantic search accuracy. Solves the "missing visual context" problem inherent in video transcripts.
 *   *Negative:* Adds a dependency on an external LLM API during the data preparation phase and increases the time required to index a new video.
 
-### ADR 010: Idempotent Processing and Prompt-Based Cache Invalidation
+## ADR 010: Idempotent Processing and Prompt-Based Cache Invalidation
 **Status:** Accepted
 **Context:** The Knowledge Engineer will work iteratively, tweaking the LLM Enrichment Prompt to get better summaries. If the pipeline crashes, or if the prompt changes, we need a safe way to re-run the ETL process without duplicating data or paying for unnecessary API calls.
 **Decision:** We implemented an idempotent ETL pipeline using SQLite state tracking (`unprocessed`, `processed`, `outdated`).
@@ -24,7 +24,7 @@
 *   *Positive:* Guarantees that the entire Vector Index is semantically consistent with the *current* active prompt. Prevents API cost overruns by safely resuming interrupted indexing runs.
 *   *Negative:* Changing a single comma in the prompt will force a complete re-indexing of all 80 videos, which takes time and consumes API credits.
 
-### ADR 012: Regex-Based Data Cleansing
+## ADR 012: Regex-Based Data Cleansing
 **Status:** Accepted
 **Context:** The raw input data contains YouTube-specific artifacts (e.g., shortened `.be` URLs, `[Muzyka]` tags) and lacks standard punctuation.
 **Decision:** We implemented a custom Regex parser inside the `TranscriptChunker` to strip noise tags, reconstruct full `https://youtu.be/` URLs, and extract integer seconds for mathematical time-chunking.

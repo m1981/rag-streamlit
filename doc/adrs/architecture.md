@@ -14,7 +14,7 @@
 *   *Positive:* Enables clean AAA (Arrange, Act, Assert) testing. We can run integration tests against temporary SQLite files and Vector directories without needing complex `MagicMock` setups.
 *   *Negative:* Developers must be disciplined not to mix reads and writes in the same function (e.g., no "get_and_update" functions).
 
-### ADR 008: Two-Phase System Architecture (Offline ETL vs. Real-time RAG)
+## ADR 008: Two-Phase System Architecture (Offline ETL vs. Real-time RAG)
 **Status:** Accepted
 **Context:** We need to process raw video transcripts and serve them to users via a chat interface. Doing both simultaneously (e.g., fetching a video, summarizing it, and searching it at runtime) would result in massive latency and high API costs per user query.
 **Decision:** We split the system into two strictly separated lifecycles:
