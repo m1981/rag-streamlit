@@ -1,4 +1,5 @@
-import os
+from core import database as db
+from core.chunker import TranscriptChunker
 from llama_index.core import (
     Document,
     VectorStoreIndex,
@@ -8,8 +9,11 @@ from llama_index.core import (
 )
 from llama_index.llms.anthropic import Anthropic
 from llama_index.embeddings.voyageai import VoyageEmbedding
-from core import database as db
-from core.chunker import TranscriptChunker
+
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 INDEX_DIR = os.environ.get("INDEX_DIR", "./cad_video_index")
 
@@ -23,10 +27,10 @@ def run_indexing_pipeline(progress_callback=None) -> None:
 
     # 1. Setup AI Clients
     llm = Anthropic(
-        model="claude-3-5-haiku-20241022", api_key=os.environ.get("ANTHROPIC_API_KEY")
+        model="claude-sonnet-4-5", api_key=os.environ.get("ANTHROPIC_API_KEY")
     )
     Settings.embed_model = VoyageEmbedding(
-        model_name="voyage-3", voyage_api_key=os.environ.get("VOYAGE_API_KEY")
+        model_name="voyage-4-large", voyage_api_key=os.environ.get("VOYAGE_API_KEY")
     )
 
     chunker = TranscriptChunker(window_seconds=60)
