@@ -43,6 +43,14 @@ test-html: ## Run tests with HTML coverage report
 test: ## Run tests with coverage
 	uv run pytest
 
+.PHONY: test-cov-simple
+test-cov-simple: ## Run UNIT tests with simple console coverage report (shows missing lines)
+	@echo "$(GREEN)Running Unit Tests with Simple Coverage Report...$(RESET)"
+	uv run pytest  \
+		--cov=school_hub \
+		--cov-report=term-missing \
+		--cov-fail-under=0
+
 .PHONY: clean
 clean: ## Remove cache and virtual environment
 	rm -rf .venv
