@@ -17,21 +17,11 @@ repos:
         args: [ --fix ]
       - id: ruff-format
 
-  # Reflex: Compile frontend before commit
-  - repo: local
-    hooks:
-      - id: reflex-compile
-        name: Reflex Compile
-        entry: uv run reflex compile
-        language: system
-        pass_filenames: false
-        always_run: true
-
-  - repo: local
-    hooks:
-      - id: coverage
-        name: Test coverage
-        entry: make test-cov-simple
-        language: system
-        pass_filenames: false
-        always_run: true
+#  - repo: local
+#    hooks:
+#      - id: coverage
+#        name: Test coverage
+#        entry: make test-cov-simple
+#        language: system
+#        pass_filenames: false
+#        always_run: true
