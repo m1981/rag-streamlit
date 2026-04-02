@@ -41,16 +41,15 @@ class TranscriptChunker:
             minutes, secs = map(int, time_str.split(":"))
             total_seconds = minutes * 60 + secs
 
-            # Initialize new chunk
+            # 1. If this is the very first line, initialize
             if not current_text:
                 current_start_time = total_seconds
                 current_start_str = time_str
                 current_url = full_url
 
-            current_text.append(text)
-
-            # Close chunk if window exceeded
-            if total_seconds - current_start_time >= self.window_seconds:
+            # 2. CHECK FIRST: Does this new line exceed the window?
+            elif total_seconds - current_start_time >= self.window_seconds:
+                # Close the OLD chunk
                 chunks.append(
                     TimeChunkModel(
                         start_time_str=current_start_str,
@@ -59,9 +58,16 @@ class TranscriptChunker:
                         chunk_text=" ".join(current_text),
                     )
                 )
+                # Reset for the NEW chunk starting with this line
                 current_text = []
+                current_start_time = total_seconds
+                current_start_str = time_str
+                current_url = full_url
 
-        # Catch remaining text
+            # 3. APPEND SECOND: Add the text to the current chunk
+            current_text.append(text)
+
+        # Catch remaining text at the end of the file
         if current_text:
             chunks.append(
                 TimeChunkModel(
